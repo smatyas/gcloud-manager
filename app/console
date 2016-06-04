@@ -2,6 +2,8 @@
 <?php
 
 use Smatyas\GCloudManager\Command\Compute\InstancesListCommand;
+use Smatyas\GCloudManager\Command\Compute\InstancesStartCommand;
+use Smatyas\GCloudManager\Command\Compute\InstancesStopCommand;
 
 set_time_limit(0);
 
@@ -9,4 +11,6 @@ $app = require_once __DIR__.'/bootstrap.php';
 
 $application = $app['console'];
 $application->add(new InstancesListCommand());
+$application->add(new InstancesStartCommand());
+$application->add(new InstancesStopCommand());
 $application->run();
