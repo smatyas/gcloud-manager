@@ -2,6 +2,7 @@
     "name": "smatyas/gcloud-manager",
     "description": "Google Cloud manager application",
     "require": {
+        "php": ">=5.4",
         "silex/silex": "~2.0",
         "knplabs/console-service-provider": "2.0",
         "google/apiclient": "^2.0.0@RC"
