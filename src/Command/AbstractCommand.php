@@ -24,23 +24,25 @@ abstract class AbstractCommand extends Command
 
     /**
      * @return string
-     *
-     * TODO: this should be read from the config json, but they are not set by the Google_Client::setAuthConfig.
      */
     protected function getProject()
     {
-        $project = 'hackathon-1328';
+        $credentials = $this->getCredentialsArray();
+        $project = $credentials['project_id'];
         return $project;
     }
 
     /**
      * @return string
-     *
-     * TODO: this should be read from the config json, but they are not set by the Google_Client::setAuthConfig.
      */
     protected function getZone()
     {
-        $zone = 'europe-west1-d';
+        $zone = getenv('GOOGLE_CLOUD_ZONE');
+        if (false === $zone) {
+            throw new \Exception(
+                'Google cloud zone must be set through the GOOGLE_CLOUD_ZONE environment variable.'
+            );
+        }
         return $zone;
     }
 
@@ -51,7 +53,9 @@ abstract class AbstractCommand extends Command
     {
         $client = new \Google_Client([]);
         $client->addScope('https://www.googleapis.com/auth/cloud-platform');
-        $client->setAuthConfig('credentials/hackathon-c87ef1f28578.json');
+
+        $credentialsFile = $this->getCredentialsFile();
+        $client->setAuthConfig($credentialsFile);
         return $client;
     }
 
@@ -69,7 +73,7 @@ abstract class AbstractCommand extends Command
             $client = $this->getGoogleClient();
         }
         $this->computeService = new \Google_Service_Compute($client);
-        
+
         return $this->computeService;
     }
 
@@ -89,6 +93,12 @@ abstract class AbstractCommand extends Command
             foreach ($operations as $operationName => $progressBar) {
                 /** @var ProgressBar $progressBar */
                 try {
+                    if ($progressBar->getProgress() == 100) {
+                        $progressBar->finish();
+                        $output->writeln('');
+                        continue;
+                    }
+
                     /** @var \Google_Service_Compute_Operation $operation */
                     $operation = $this->getGoogleComputeService()->zoneOperations->get(
                         $this->getProject(),
@@ -113,5 +123,33 @@ abstract class AbstractCommand extends Command
                 }
             }
         }
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    protected function getCredentialsFile()
+    {
+        $credentialsFile = getenv('GOOGLE_APPLICATION_CREDENTIALS');
+        if (false === $credentialsFile) {
+            throw new \Exception(
+                'Credentials file must be set through the GOOGLE_APPLICATION_CREDENTIALS environment variable.'
+            );
+        }
+        return $credentialsFile;
+    }
+
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function getCredentialsArray()
+    {
+        $file = $this->getCredentialsFile();
+        $contents = file_get_contents($file);
+        $credentials = json_decode($contents, true);
+
+        return $credentials;
     }
 }
