@@ -3,7 +3,8 @@
     "description": "Google Cloud manager application",
     "require": {
         "silex/silex": "~2.0",
-        "knplabs/console-service-provider": "2.0"
+        "knplabs/console-service-provider": "2.0",
+        "google/apiclient": "^2.0.0@RC"
     },
     "license": "MIT",
     "authors": [
